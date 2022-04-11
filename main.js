@@ -113,7 +113,7 @@ function verifyButtons() {
         toggleButton('previous');
     }
 
-    if ((end + 5 >= max && nextButton.style.visibility === 'visible' || (end + 5 < max && nextButton.style.visibility === 'hidden'))) {
+    if ((end + 5 >= max && nextButton.style.visibility === 'visible') || (end + 5 < max && nextButton.style.visibility === 'hidden')) {
         toggleButton('next');
     }
 }
