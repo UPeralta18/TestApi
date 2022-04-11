@@ -4,9 +4,11 @@ var end = 5;
 var max = 999;
 
 function getData() {
+    verifyButtons();
+    removeTooltip();
+
     let loading = document.getElementById('loading');
     loading.style.display = 'flex';
-    verifyButtons();
 
     fetch(url).then(function (response) {
         return response.json();
@@ -20,8 +22,50 @@ function getData() {
 
         products.map(function (product) {
             productsElement.innerHTML += `
-                                <div class="product" onmouseover="showTooltip('${product.fields.Name}')" onmouseout="remove()">
+                                <div class="product" onmouseover="showTooltip('${product.fields.Name}')" onmouseout="removeTooltip()">
                                     <img width="20%" src="${product.fields.Images[0].url}" style="float:left;" />
+                                </div>`;
+        });
+    }).catch(function (err) {
+        console.warn(`Something went wrong.`, err);
+    });
+}
+
+function search() {
+    verifyButtons();
+    removeTooltip();
+    resetVariables();
+
+    let search = document.getElementById('search').value
+    search = search.toLowerCase();
+    // let newUrl = `${url}&filterByFormula=FIND("${search}",{Name})`; //Search by name with the API method FIND
+    fetch(url).then(function (response) {
+        return response.json();
+    }).then(function (data) {
+        let products = data.records;
+        let productsNew = new Array();
+        let productsElement = document.getElementById(`products`);
+        productsElement.innerHTML = ``;
+
+        products.map(function (product) {
+            let name = product.fields.Name.toLowerCase();
+            if (name.includes(search)) {
+                productsNew.push(product);
+            }
+        });
+
+        max = productsNew.length;
+        if (max < 5) {
+            hideButtons();
+        } else {
+            showButtons();
+        }
+
+        let productsNewFiltered = productsNew.slice(start, end);
+        productsNewFiltered.map(function (productNew) {
+            productsElement.innerHTML += `
+                                <div class="product" onmouseover="showTooltip('${productNew.fields.Name}')" onmouseout="removeTooltip()">
+                                    <img width="20%" src="${productNew.fields.Images[0].url}" style="float:left;" />
                                 </div>`;
         });
     }).catch(function (err) {
@@ -44,9 +88,11 @@ function showTooltip(text) {
     });
 }
 
-function remove() {
+function removeTooltip() {
     const element = document.getElementById('tip');
-    element.remove();
+    if (element != null) {
+        element.remove();
+    }
 }
 
 function previous() {
@@ -55,7 +101,7 @@ function previous() {
         end -= 5;
         getData();
     }
-    
+
     if (end + 5 >= max) {
         toggleButton('next');
     }
@@ -66,42 +112,6 @@ function next() {
     end += 5;
     getData();
     let button = document.getElementById('previous');
-}
-
-function search() {
-    let search = document.getElementById('search').value;
-    // let newUrl = `${url}&filterByFormula=FIND("${search}",{Name})`; //Search by name with the API method FIND
-    fetch(url).then(function (response) {
-        return response.json();
-    }).then(function (data) {
-        let products = data.records;
-        let productsNew = new Array();
-        let productsElement = document.getElementById(`products`);
-        productsElement.innerHTML = ``;
-
-        products.map(function (product) {
-            if (product.fields.Name.includes(search)) {
-                productsNew.push(product);
-            }
-        });
-
-        max = productsNew.length;
-        if (max < 5) {
-            hideButtons();
-        } else {
-            showButtons();
-        }
-
-        let productsNewFiltered = productsNew.slice(start, end);
-        productsNewFiltered.map(function (productNew) {
-            productsElement.innerHTML += `
-                                <div class="product" onmouseover="showTooltip('${productNew.fields.Name}')" onmouseout="remove()">
-                                    <img width="20%" src="${productNew.fields.Images[0].url}" style="float:left;" />
-                                </div>`;
-        });
-    }).catch(function (err) {
-        console.warn(`Something went wrong.`, err);
-    });
 }
 
 function hideButtons() {
@@ -128,7 +138,7 @@ function verifyButtons() {
     if (start > 0 && button.style.visibility === 'hidden') {
         toggleButton('previous');
     }
-    
+
     if (end >= max) {
         toggleButton('next');
     }
@@ -141,4 +151,10 @@ function toggleButton(id) {
     } else {
         button.style.visibility = 'hidden';
     }
+}
+
+function resetVariables() {
+    start = 0;
+    end = 5;
+    max = 999;
 }
