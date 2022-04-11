@@ -32,9 +32,9 @@ function getData() {
 }
 
 function search() {
-    verifyButtons();
     removeTooltip();
     resetVariables();
+    verifyButtons();
 
     let search = document.getElementById('search').value
     search = search.toLowerCase();
@@ -55,11 +55,7 @@ function search() {
         });
 
         max = productsNew.length;
-        if (max < 5) {
-            hideButtons();
-        } else {
-            showButtons();
-        }
+        verifyButtons();
 
         let productsNewFiltered = productsNew.slice(start, end);
         productsNewFiltered.map(function (productNew) {
@@ -74,8 +70,8 @@ function search() {
 }
 
 function showTooltip(text) {
-    let tip = document.createElement('span');
-    tip.setAttribute('id', 'tip');
+    let tip = document.createElement('div');
+    tip.setAttribute('class', 'tip');
     tip.style.position = 'absolute';
     let content = document.createTextNode(text);
     tip.appendChild(content);
@@ -89,9 +85,9 @@ function showTooltip(text) {
 }
 
 function removeTooltip() {
-    const element = document.getElementById('tip');
-    if (element != null) {
-        element.remove();
+    const tip = document.getElementsByClassName('tip');
+    for (let i = 0; i < tip.length; i++) {
+        tip[i].remove();
     }
 }
 
@@ -101,45 +97,23 @@ function previous() {
         end -= 5;
         getData();
     }
-
-    if (end + 5 >= max) {
-        toggleButton('next');
-    }
 }
 
 function next() {
     start += 5;
     end += 5;
     getData();
-    let button = document.getElementById('previous');
-}
-
-function hideButtons() {
-    let button = document.getElementsByTagName('button');
-    for (let i = 0; i < button.length; i++) {
-        button[i].style.visibility = 'hidden';
-    }
-}
-
-function showButtons() {
-    let button = document.getElementsByTagName('button');
-    for (let i = 0; i < button.length; i++) {
-        button[i].style.visibility = 'visible';
-    }
 }
 
 function verifyButtons() {
-    let button = document.getElementById('previous');
+    let previousButton = document.getElementById('previous');
+    let nextButton = document.getElementById('next');
 
-    if (start === 0) {
+    if ((start > 0 && previousButton.style.visibility === 'hidden') || (start === 0 && previousButton.style.visibility === 'visible')) {
         toggleButton('previous');
     }
 
-    if (start > 0 && button.style.visibility === 'hidden') {
-        toggleButton('previous');
-    }
-
-    if (end >= max) {
+    if ((end + 5 >= max && nextButton.style.visibility === 'visible' || (end + 5 < max && nextButton.style.visibility === 'hidden'))) {
         toggleButton('next');
     }
 }
